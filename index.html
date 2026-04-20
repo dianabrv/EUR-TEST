@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic - West Nile</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-game {
+            background-image: url('image_fond1.jpeg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            width: 100vw;
+        }
+        .bulle-texte {
+            position: relative;
+            background: white;
+            border: 3px solid #1e40af;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .bulle-texte::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 20px 20px 0;
+            border-style: solid;
+            border-color: white transparent transparent;
+        }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+        /* --- Zone du mini-jeu --- */
+        .moustique {
+            position: absolute;
+            width: 200px; /* Taille du moustique, à ajuster */
+            height: 40px;
+            cursor: pointer;
+            user-select: none;
+            z-index: 30;
+        }
+        .moustique img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Effet d'éclatement au clic */
+        .moustique.eclate {
+            animation: eclaterAnimation 0.3s ease-out forwards;
+            pointer-events: none; /* Désactive les clics pendant l'animation */
+        }
+        @keyframes eclaterAnimation {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; filter: sepia(100%) saturate(10000%) hue-rotate(0deg); } /* Effet rouge sang initial */
+            50% { transform: translate(0, -20px) scale(1.8) rotate(15deg); opacity: 1; }
+            100% { transform: translate(0, -30px) scale(0.1) rotate(-15deg); opacity: 0; }
+        }
+
+        /* Animation de vol (inchangée) */
+        @keyframes voler {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(100px, 50px) rotate(10deg); }
+            50% { transform: translate(50px, 150px) rotate(-10deg); }
+            75% { transform: translate(-50px, 100px) rotate(5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+    </style>
+</head>
+<body class="bg-sky-100 overflow-hidden">
+    <div id="app">
+        <transition name="fade" mode="out-in">
+            <div v-if="etape === 'accueil'" key="accueil" class="relative flex flex-col items-center justify-center h-screen w-full">
+                
+                <div v-for="m in moustiques" 
+                     :key="m.id" 
+                     class="moustique"
+                     :class="{ 'eclate': m.eclate }"
+                     :style="{ 
+                        top: m.y + '%', 
+                        left: m.x + '%', 
+                        animation: m.eclate ? 'eclaterAnimation 0.3s ease-out forwards' : `voler ${m.vitesse}s infinite linear` 
+                     }"
+                     @click="eclater(m.id)">
+                    <img src="moustique.png" alt="Moustique">
+                </div>
+
+                <h1 class="text-4xl font-extrabold text-blue-900 mb-10 text-center z-20 bg-sky-100/70 p-4 rounded-xl">Vigilance virus West Nile : le test interactif</h1>
+                <button @click="etape = 'nom'" class="bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold py-5 px-12 rounded-full shadow-2xl transform transition hover:scale-110 z-20">
+                    COMMENCER
+                </button>
+            </div>
+
+            <div v-else-if="etape === 'nom'" key="nom" class="flex flex-col items-center justify-center h-screen">
+                <div class="bg-white p-10 rounded-3xl shadow-2xl border-4 border-blue-200 w-96">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">Bonjour, quel est ton nom ?</h2>
+                    <input v-model="nom" @keyup.enter="validerNom" type="text" class="w-full border-2 border-blue-300 p-3 rounded-xl mb-6 focus:border-blue-600 outline-none text-lg" placeholder="Ex: Jean Dupont">
+                    <button @click="validerNom" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl text-lg shadow-lg">
+                        Valider
+                    </button>
+                </div>
+            </div>
+
+            <div v-else-if="etape === 'jeu'" key="jeu" class="bg-game flex flex-col items-center justify-center p-4">
+                <div class="flex flex-col items-center w-full max-w-2xl">
+                    <div class="bulle-texte mb-12">
+                        <p class="text-xl text-gray-800 font-semibold text-center">
+                            {{ questions[indexQuestion].texte.replace('{nom}', nom) }}
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-10">
+                        <button v-for="(reponse, idx) in questions[indexQuestion].reponses" 
+                                :key="idx"
+                                @click="prochaineQuestion"
+                                class="bg-white hover:bg-blue-50 border-4 border-blue-500 text-blue-800 text-lg font-bold py-4 px-6 rounded-2xl shadow-xl transform transition hover:-translate-y-1">
+                            {{ reponse }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else-if="etape === 'resultat'" key="resultat" class="flex flex-col items-center justify-center h-screen p-6">
+                <div class="bg-white p-8 rounded-3xl shadow-2xl border-4 border-blue-500 max-w-lg w-full text-center">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-6">Diagnostic terminé</h2>
+                    <p class="text-gray-700 mb-8">Merci {{ nom }}. Voici les prochaines étapes recommandées :</p>
+                    
+                    <div class="flex flex-col gap-4">
+                        <a href="https://www.doctolib.fr" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-md transition">
+                            Prendre RDV (Doctolib)
+                        </a>
+                        <a href="#" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-md transition">
+                            Se protéger
+                        </a>
+                        <a href="#" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-6 rounded-xl shadow-md transition">
+                            En savoir plus
+                        </a>
+                        <button @click="rejouer" class="mt-4 text-blue-500 underline">Recommencer</button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const etape = ref('accueil');
+                const nom = ref('');
+                const indexQuestion = ref(0);
+                const moustiques = ref([]);
+
+                // Générer 10 moustiques aléatoires
+                const genererMoustiques = () => {
+                    moustiques.value = Array.from({ length: 10 }, (_, i) => ({
+                        id: i,
+                        x: Math.random() * 85 + 5, // Position entre 5% et 90%
+                        y: Math.random() * 85 + 5,
+                        vitesse: Math.random() * 4 + 2, // 2 à 6 secondes pour un cycle
+                        eclate: false // État pour l'animation d'explosion
+                    }));
+                };
+
+                // Gère le clic : active l'animation d'éclatement puis retire le moustique
+                const eclater = (id) => {
+                    const moustique = moustiques.value.find(m => m.id === id);
+                    if (moustique) {
+                        moustique.eclate = true; // Déclenche l'animation CSS
+                        // Retire l'objet de la liste après la fin de l'animation (300ms)
+                        setTimeout(() => {
+                            moustiques.value = moustiques.value.filter(m => m.id !== id);
+                        }, 300);
+                    }
+                };
+
+                const questions = [
+                    {
+                        texte: "Bonjour {nom}, quel symptôme as-tu ?",
+                        reponses: ["Fièvre brutale", "Éruption cutanée"]
+                    },
+                    {
+                        texte: "As-tu séjourné en zone rurale récemment ?",
+                        reponses: ["Oui près d'un lac", "Non uniquement en ville"]
+                    },
+                    {
+                        texte: "As-tu des piqûres de moustiques ?",
+                        reponses: ["Oui, beaucoup", "Non, aucune"]
+                    }
+                ];
+
+                const validerNom = () => {
+                    if (nom.value.trim().length > 1) {
+                        etape.value = 'jeu';
+                    }
+                };
+
+                const prochaineQuestion = () => {
+                    if (indexQuestion.value < questions.length - 1) {
+                        indexQuestion.value++;
+                    } else {
+                        etape.value = 'resultat';
+                    }
+                };
+
+                const rejouer = () => {
+                    indexQuestion.value = 0;
+                    genererMoustiques();
+                    etape.value = 'accueil';
+                };
+
+                onMounted(genererMoustiques);
+
+                return { etape, nom, indexQuestion, questions, moustiques, validerNom, prochaineQuestion, rejouer, eclater };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
