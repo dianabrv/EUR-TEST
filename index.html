@@ -17,6 +17,13 @@
             min-height: 100vh;
             width: 100vw;
         }
+
+        /* Version mobile de l'image d'accueil */
+        @media (max-width: 480px) {
+            .bg-accueil {
+                background-image: url('image_acc_mobile.png');
+            }
+        }
         .bg-game {
             background-image: url('image_fond1.png');
             background-size: cover;
@@ -272,7 +279,7 @@
 
             /* Boutons fixes repositionnés pour éviter chevauchement */
             .horse-btn {
-                bottom: 60px;
+                bottom: 20px;
                 left: 8px;
                 font-size: clamp(10px, 3vw, 14px) !important;
                 padding: 6px 10px !important;
