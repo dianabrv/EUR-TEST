@@ -232,6 +232,80 @@
                 height: 130px !important;
             }
         }
+
+        /* Améliorations pour très petits écrans (téléphones) */
+        @media (max-width: 480px) {
+            .bulle-texte {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+                max-width: 98vw;
+                margin: 0 1vw;
+            }
+            .bulle-texte p { font-size: 0.75rem !important; }
+
+            /* Boutons plus grands pour le toucher */
+            button, .horse-btn {
+                min-height: 44px !important;
+                font-size: clamp(12px, 4vw, 16px) !important;
+                padding: 0.75rem 1rem !important;
+            }
+
+            /* Titre encore plus petit */
+            h1 { font-size: clamp(10px, 4vw, 16px) !important; }
+
+            /* Bouton commencer adapté */
+            .btn-commencer {
+                font-size: clamp(16px, 5vw, 18px) !important;
+                padding: 0.8rem 2.5rem !important;
+            }
+
+            /* Carte plus petite */
+            img.carte-img {
+                height: 100px !important;
+            }
+
+            /* Progress header ajusté */
+            .progress-header {
+                padding: 3px 10px;
+            }
+            .progress-label-alt { font-size: 9px; }
+
+            /* Boutons fixes repositionnés pour éviter chevauchement */
+            .horse-btn {
+                bottom: 60px;
+                left: 8px;
+                font-size: clamp(10px, 3vw, 14px) !important;
+                padding: 6px 10px !important;
+            }
+            .lang-switch {
+                bottom: 8px;
+                right: 8px;
+                padding: 4px;
+            }
+            .flag {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            /* Bouton retour ajusté */
+            .btn-retour {
+                top: 35px;
+                left: 10px;
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+
+            /* Inputs plus grands */
+            input {
+                font-size: 16px !important; /* Empêche zoom sur iOS */
+                padding: 0.75rem !important;
+            }
+
+            /* Espacement réduit pour petits écrans */
+            .bg-accueil {
+                padding-top: clamp(100px, 20vw, 0px);
+            }
+        }
     </style>
 </head>
 <body class="bg-sky-100 overflow-x-hidden">
