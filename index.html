@@ -20,7 +20,7 @@
         .bg-game {
             background-image: url('image_fond1.png');
             background-size: cover;
-            background-position: center top;
+            background-position: center;
             min-height: 100vh;
             width: 100vw;
             transition: background-image 0.5s ease;
@@ -28,24 +28,10 @@
         .bg-easter-egg {
             background-image: url('easter_egg.png');
             background-size: cover;
-            background-position: center top;
+            background-position: center;
             min-height: 100vh;
             width: 100vw;
             transition: background-image 0.5s ease;
-        }
-        /* Sur mobile portrait : image en entier, contenu qui défile dessous */
-        @media (max-width: 640px) and (orientation: portrait) {
-            .bg-game, .bg-easter-egg {
-                background-size: 100% auto;
-                background-repeat: no-repeat;
-                background-position: top center;
-                min-height: 100vh;
-            }
-            .bg-accueil {
-                background-size: 100% auto;
-                background-repeat: no-repeat;
-                background-position: top center;
-            }
         }
         .bulle-texte {
             position: relative;
@@ -131,15 +117,15 @@
 
         .lang-switch {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 12px;
+            right: 12px;
             display: flex;
-            gap: 10px;
-            z-index: 100;
-            background: rgba(255,255,255,0.8);
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 8px;
+            z-index: 200;
+            background: rgba(255,255,255,0.85);
+            padding: 6px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .flag {
             cursor: pointer;
@@ -205,16 +191,6 @@
             color: white;
         }
 
-        /* Zone image mobile : ratio 16:9 */
-        .game-bg-area {
-            width: 100%;
-            padding-top: 56.25%; /* ratio 16:9 */
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            flex-shrink: 0;
-        }
-
         /* Responsive adjustments */
         @media (max-width: 640px) {
             .progress-label-alt { font-size: 10px; }
@@ -237,18 +213,18 @@
 
         <transition name="fade" mode="out-in">
             <!-- ACCUEIL -->
-            <div v-if="etape === 'accueil'" key="accueil" class="relative flex flex-col items-center justify-center min-h-screen w-full bg-accueil px-4" style="overflow:hidden;">
+            <div v-if="etape === 'accueil'" key="accueil" class="relative flex flex-col items-center justify-center min-h-screen w-full bg-accueil px-4" style="overflow:hidden; padding-top: clamp(120px, 25vw, 0px);">
                 <div v-for="m in moustiques" :key="m.id" class="moustique" :class="{ 'eclate': m.eclate }" @click="eclater(m.id)" :style="{ top: m.y + '%', left: m.x + '%', animation: m.eclate ? 'eclaterAnimation 0.3s forwards' : `voler ${m.vitesse}s infinite linear` }">
                     <img src="moustique.png">
                 </div>
 
                 <!-- Titre avec fond blanc -->
-                <h1 class="font-extrabold text-blue-900 mb-6 mt-16 text-center z-20 bg-white/90 p-4 rounded-xl shadow-lg w-full max-w-3xl whitespace-nowrap" style="font-size: clamp(14px, 2.8vw, 32px);">{{ t('title') }}</h1>
+                <h1 class="font-extrabold text-blue-900 mb-4 text-center z-20 bg-white/90 p-3 rounded-xl shadow-lg w-full max-w-3xl" style="font-size: clamp(13px, 2.8vw, 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ t('title') }}</h1>
 
                 <button @click="etape = 'nom'" class="bg-blue-600 hover:bg-blue-700 text-white text-xl sm:text-2xl font-bold py-4 sm:py-5 px-10 sm:px-12 rounded-full shadow-2xl transform transition hover:scale-110 z-20 mb-6">{{ t('start') }}</button>
 
                 <!-- Bouton cheval ancré en bas à gauche au-dessus du logo cheval -->
-                <a href="VOTRE_LIEN_ICI" target="_blank" class="horse-btn" style="position:fixed; bottom: 100px; left: 20px; z-index:50;">
+                <a href="https://respe.net/maladie-equine/maladies-reglementees/fievre-de-west-nile/" target="_blank" class="horse-btn" style="position:fixed; bottom: 30px; left: 12px; z-index:50; font-size: clamp(11px, 3vw, 15px); padding: 8px 14px;">
                     {{ t('horseBtn') }}
                 </a>
             </div>
@@ -263,24 +239,12 @@
             </div>
 
             <!-- INTRO -->
-            <div v-else-if="etape === 'intro'" key="intro" class="flex flex-col min-h-screen">
-                <!-- Image de fond en haut sur mobile, background sur desktop -->
-                <div :class="[easterEgg ? 'bg-easter-egg' : 'bg-game']" class="game-bg-area"></div>
-                <!-- Contenu collé sous l'image -->
-                <div class="flex flex-col items-center p-4 pt-6 pb-8 flex-1 bg-sky-100 sm:hidden">
+            <div v-else-if="etape === 'intro'" key="intro" :class="[easterEgg ? 'bg-easter-egg' : 'bg-game', 'flex flex-col items-center justify-center p-4 min-h-screen']">
+                <div class="flex flex-col items-center justify-end w-full max-w-2xl" style="min-height:100vh; padding-bottom: 40px; padding-top: 60vh;">
                     <div class="bulle-texte mb-6">
-                        <p class="text-base text-gray-800 font-semibold text-center">{{ t('introText') }}</p>
+                        <p class="text-base sm:text-xl text-gray-800 font-semibold text-center">{{ t('introText') }}</p>
                     </div>
-                    <button @click="etape = 'jeu'" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-2xl shadow-xl">{{ t('ok') }}</button>
-                </div>
-                <!-- Desktop : layout original -->
-                <div :class="[easterEgg ? 'bg-easter-egg' : 'bg-game']" class="hidden sm:flex flex-col items-center justify-center p-4 min-h-screen">
-                    <div class="flex flex-col items-center w-full max-w-2xl mt-80">
-                        <div class="bulle-texte mb-12">
-                            <p class="text-xl text-gray-800 font-semibold text-center">{{ t('introText') }}</p>
-                        </div>
-                        <button @click="etape = 'jeu'" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-2xl shadow-xl transform transition hover:-translate-y-1">{{ t('ok') }}</button>
-                    </div>
+                    <button @click="etape = 'jeu'" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-2xl shadow-xl transform transition hover:-translate-y-1">{{ t('ok') }}</button>
                 </div>
             </div>
 
@@ -293,12 +257,17 @@
                     </div>
                 </div>
 
-<div v-if="questions[indexQuestion].afficheCarte" class="absolute left-2 sm:left-4 top-[60px] sm:top-[80px] z-50">
+                <!-- Bouton retour -->
+                <button v-if="historique.length > 0" @click="retourQuestion" class="btn-retour">
+                    &#8592; Retour
+                </button>
+
+                <div v-if="questions[indexQuestion].afficheCarte" class="absolute left-2 sm:left-4 top-[60px] sm:top-[80px] z-50">
                     <img src="carte.jpg" class="ml-2 sm:ml-24 h-[180px] sm:h-[300px] w-auto rounded-2xl shadow-2xl border-4 border-white">
                 </div>
                 
-                <div class="flex flex-col items-center w-full max-w-2xl mt-40 sm:mt-80">
-                    <div class="bulle-texte mb-8 sm:mb-12">
+                <div class="flex flex-col items-center w-full max-w-2xl" style="position:absolute; bottom: 30px; left:50%; transform:translateX(-50%); width:90%;">
+                    <div class="bulle-texte mb-4" style="max-width:100%;">
                         <p class="text-lg sm:text-xl text-gray-800 font-semibold text-center">{{ t(questions[indexQuestion].texteKey) }}</p>
                     </div>
 
@@ -358,7 +327,7 @@
 
                 const translations = {
                     fr: {
-                        title: "Vigilance virus West Nile : Le Test interactif",
+                        title: "Vigilance virus West Nile : Serious game",
                         start: "COMMENCER",
                         askName: "Bonjour, quel est votre nom ?",
                         namePlaceholder: "Ex: Jean Dupont",
@@ -376,7 +345,7 @@
                         adviceHigh: "Plusieurs facteurs d'exposition sont présents. Par précaution, demandez un avis médical.",
                         horseBtn: "Vous avez des chevaux ? Cliquez ici",
                         q_age: "Avez-vous plus de 65 ans ?",
-                        q_immuno: "Votre système immunitaire est-il affaibli (traitements ou pathologies) ?",
+                        q_immuno: "Votre système immunitaire est-il affaibli par des traitements ou pathologies ?",
                         q_voyage: "Rentrez-vous de voyage récemment ?",
                         q_country: "De quel pays revenez-vous ?",
                         q_risk: "Ce pays fait partie des zones de circulation du virus.",
@@ -397,7 +366,7 @@
                         q_house: "Votre logement est-il protégé (moustiquaires) ?"
                     },
                     en: {
-                        title: "West Nile Virus Check : Interactive Test",
+                        title: "West Nile Virus Check : Serious game",
                         start: "START", askName: "Hello, what is your name?",
                         namePlaceholder: "e.g., John Doe", validate: "Validate",
                         introText: "Hello {{nom}}, I am going to ask you a few questions to see if your symptoms could be related to West Nile Virus.",
