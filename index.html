@@ -115,9 +115,10 @@
             white-space: nowrap;
         }
 
+        /* Lang switch — déplacé en bas à droite */
         .lang-switch {
             position: fixed;
-            top: 12px;
+            bottom: 12px;
             right: 12px;
             display: flex;
             gap: 8px;
@@ -142,7 +143,7 @@
             color: white;
         }
 
-        /* Bouton cheval */
+        /* Bouton cheval — remonté (bottom: 80px) */
         .horse-btn {
             display: inline-flex;
             align-items: center;
@@ -150,8 +151,8 @@
             background: #7c3aed;
             color: white;
             font-weight: 700;
-            font-size: clamp(12px, 3.5vw, 16px);
-            padding: 10px 18px;
+            font-size: clamp(11px, 3vw, 15px);
+            padding: 8px 14px;
             border-radius: 50px;
             box-shadow: 0 4px 15px rgba(124,58,237,0.4);
             text-decoration: none;
@@ -159,6 +160,10 @@
             border: none;
             cursor: pointer;
             white-space: nowrap;
+            position: fixed;
+            bottom: 80px;
+            left: 12px;
+            z-index: 50;
         }
         .horse-btn:hover {
             background: #6d28d9;
@@ -191,10 +196,41 @@
             color: white;
         }
 
-        /* Responsive adjustments */
+        /* ── Responsive : tout se scale comme sur PC ── */
         @media (max-width: 640px) {
             .progress-label-alt { font-size: 10px; }
-            .bulle-texte { padding: 1rem; font-size: 0.9rem; }
+
+            /* Bulle texte : on réduit mais on garde la même structure */
+            .bulle-texte {
+                padding: 0.75rem 1rem;
+                font-size: 0.82rem;
+                border-radius: 1rem;
+                max-width: 95vw;
+            }
+            .bulle-texte p { font-size: 0.82rem !important; }
+
+            /* Boutons de réponse */
+            button, .horse-btn {
+                font-size: clamp(11px, 3.2vw, 15px) !important;
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            /* Titre accueil */
+            h1 { font-size: clamp(11px, 3vw, 18px) !important; }
+
+            /* Bouton commencer */
+            .btn-commencer {
+                font-size: clamp(14px, 4vw, 20px) !important;
+                padding: 0.6rem 2rem !important;
+            }
+
+            /* Carte */
+            img.carte-img {
+                height: 130px !important;
+            }
         }
     </style>
 </head>
@@ -221,10 +257,10 @@
                 <!-- Titre avec fond blanc -->
                 <h1 class="font-extrabold text-blue-900 mb-4 text-center z-20 bg-white/90 p-3 rounded-xl shadow-lg w-full max-w-3xl" style="font-size: clamp(13px, 2.8vw, 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ t('title') }}</h1>
 
-                <button @click="etape = 'nom'" class="bg-blue-600 hover:bg-blue-700 text-white text-xl sm:text-2xl font-bold py-4 sm:py-5 px-10 sm:px-12 rounded-full shadow-2xl transform transition hover:scale-110 z-20 mb-6">{{ t('start') }}</button>
+                <button @click="etape = 'nom'" class="btn-commencer bg-blue-600 hover:bg-blue-700 text-white text-xl sm:text-2xl font-bold py-4 sm:py-5 px-10 sm:px-12 rounded-full shadow-2xl transform transition hover:scale-110 z-20 mb-6">{{ t('start') }}</button>
 
-                <!-- Bouton cheval ancré en bas à gauche au-dessus du logo cheval -->
-                <a href="https://respe.net/maladie-equine/maladies-reglementees/fievre-de-west-nile/" target="_blank" class="horse-btn" style="position:fixed; bottom: 30px; left: 12px; z-index:50; font-size: clamp(11px, 3vw, 15px); padding: 8px 14px;">
+                <!-- Bouton cheval -->
+                <a href="https://respe.net/maladie-equine/maladies-reglementees/fievre-de-west-nile/" target="_blank" class="horse-btn">
                     {{ t('horseBtn') }}
                 </a>
             </div>
@@ -263,7 +299,7 @@
                 </button>
 
                 <div v-if="questions[indexQuestion].afficheCarte" class="absolute left-2 sm:left-4 top-[60px] sm:top-[80px] z-50">
-                    <img src="carte.jpg" class="ml-2 sm:ml-24 h-[180px] sm:h-[300px] w-auto rounded-2xl shadow-2xl border-4 border-white">
+                    <img src="carte.jpg" class="carte-img ml-2 sm:ml-24 h-[180px] sm:h-[300px] w-auto rounded-2xl shadow-2xl border-4 border-white">
                 </div>
                 
                 <div class="flex flex-col items-center w-full max-w-2xl" style="position:absolute; bottom: 30px; left:50%; transform:translateX(-50%); width:90%;">
@@ -492,7 +528,6 @@
 
                 onMounted(() => {
                     generateMoustiques();
-                    // Préchargement des images de fond
                     ['image_fond1.png', 'easter_egg.png', 'image_acc.png', 'moustique.png', 'carte.jpg'].forEach(src => {
                         const img = new Image();
                         img.src = src;
